@@ -699,14 +699,14 @@ body {
 }
 
 .auth-links a {
-    color: var(--auth-green);
+    color: #2563eb;
     text-decoration: none;
     font-weight: 500;
     transition: color 0.2s ease;
 }
 
 .auth-links a:hover {
-    color: var(--auth-green);
+    color: #1d4ed8;
     text-decoration: underline;
 }
 
