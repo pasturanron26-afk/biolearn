@@ -137,6 +137,65 @@ window.ecoAuth = {
 // LOGOUT CONFIRMATION
 // Shared by every page that uses auth.js.
 // =========================================
+let navigationSession;
+let navigationSessionLoaded = false;
+let navigationSessionPromise;
+const navigationButtonMarkup = new WeakMap();
+
+function updateGuestNavigation(session) {
+  document.querySelectorAll('#logoutButton, #profileLogoutBtn').forEach((button) => {
+    if (!navigationButtonMarkup.has(button)) {
+      navigationButtonMarkup.set(button, button.innerHTML);
+    }
+
+    if (session) {
+      button.innerHTML = navigationButtonMarkup.get(button);
+      delete button.dataset.guestSignIn;
+      return;
+    }
+
+    button.innerHTML = '<i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> Sign In';
+    button.dataset.guestSignIn = 'true';
+  });
+}
+
+function setNavigationSession(session) {
+  navigationSession = session;
+  navigationSessionLoaded = true;
+  updateGuestNavigation(session);
+}
+
+function getNavigationSession() {
+  if (navigationSessionLoaded) return Promise.resolve(navigationSession);
+  if (!navigationSessionPromise) {
+    navigationSessionPromise = ecoSupabase.auth.getSession()
+      .then(({ data, error }) => {
+        if (error) throw error;
+        setNavigationSession(data.session);
+        return data.session;
+      })
+      .finally(() => {
+        navigationSessionPromise = null;
+      });
+  }
+  return navigationSessionPromise;
+}
+
+ecoSupabase.auth.onAuthStateChange((_event, session) => {
+  setNavigationSession(session);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (navigationSessionLoaded) {
+    updateGuestNavigation(navigationSession);
+    return;
+  }
+
+  getNavigationSession().catch((error) => {
+    console.error('Unable to determine navigation sign-in state:', error);
+  });
+});
+
 let logoutDialog;
 let logoutCancelButton;
 let logoutConfirmButton;
@@ -347,13 +406,28 @@ function openLogoutDialog(trigger) {
   });
 }
 
-document.addEventListener('click', (event) => {
+document.addEventListener('click', async (event) => {
   if (!(event.target instanceof Element)) return;
   const trigger = event.target.closest('#logoutButton, #profileLogoutBtn');
   if (!trigger) return;
 
   event.preventDefault();
   event.stopImmediatePropagation();
+
+  let session;
+  try {
+    session = await getNavigationSession();
+  } catch (error) {
+    console.error('Unable to determine navigation sign-in state:', error);
+    window.alert('Unable to check your sign-in status. Please try again.');
+    return;
+  }
+
+  if (!session) {
+    window.location.href = 'signup.html';
+    return;
+  }
+
   ensureLogoutDialog();
   openLogoutDialog(trigger);
 }, true);
