@@ -12,6 +12,17 @@
 
     <title>Animal Cell · BioLearn</title>
 
+    <script>
+        const mobileModel = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+        const modelPreload = document.createElement("link");
+        modelPreload.rel = "preload";
+        modelPreload.as = "fetch";
+        modelPreload.crossOrigin = "anonymous";
+        modelPreload.href = mobileModel
+            ? "./threeDyModels/ANIMALCELLmobile.glb"
+            : "./threeDyModels/ANIMALCELL.glb";
+        document.head.append(modelPreload);
+    </script>
 
     <!-- =========================================
          BOOTSTRAP 5 CSS
@@ -623,19 +634,8 @@
     ========================================= -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- =========================================
-         INFORMATION JAVASCRIPT
-    ========================================= -->
-    <script type="module" src="js/organelleInfo.js"></script> 
-    <!-- OR js/organelleInfo.js for AnimalCell.html -->
-
-    <!-- =========================================
-         THREE.JS JAVASCRIPT
-    ========================================= -->
-    <script type="module" src="js/tredii.js"></script> 
     <!-- Viewer UI polish: grouped organelle list, captions, hint -->
     <script type="module" src="js/viewerChrome.js?v=4"></script>
-    <!-- OR js/tredii.js for AnimalCell.html -->
 
     <!-- =========================================
         SIDEBAR TOGGLE SCRIPT

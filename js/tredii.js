@@ -773,6 +773,7 @@ const dracoLoader =
 dracoLoader.setDecoderPath(
     "https://www.gstatic.com/draco/versioned/decoders/1.5.6/"
 );
+dracoLoader.preload();
 
 loader.setDRACOLoader(
     dracoLoader
